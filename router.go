@@ -13,6 +13,7 @@ type Router struct {
 	address      string
 	mux          *http.ServeMux
 	errorHandler ErrorHandlerFunc
+	middleware   []MiddlewareFunc
 }
 
 func NewRouter(config *RouterConfig) *Router {
@@ -40,6 +41,7 @@ func NewRouter(config *RouterConfig) *Router {
 	mux := http.NewServeMux()
 
 	r.mux = mux
+	r.middleware = make([]MiddlewareFunc, 0)
 	return r
 }
 
@@ -49,12 +51,27 @@ func NewRouter(config *RouterConfig) *Router {
 // router.RouteFunc("GET /", someHandler)
 func (router *Router) RouteFunc(pattern string, h HandlerFunc) {
 	router.mux.HandleFunc(pattern, func(w http.ResponseWriter, r *http.Request) {
-		err := h(w, r)
-		if err != nil {
-			router.errorHandler(w, err)
-			return
+		for _, middleware := range router.middleware {
+			err := middleware(h)(w, r)
+			if err != nil {
+				router.errorHandler(w, err)
+				return
+			}
 		}
+
+		if len(router.middleware) == 0 {
+			err := h(w, r)
+			if err != nil {
+				router.errorHandler(w, err)
+				return
+			}
+		}
+
 	})
+}
+
+func (router *Router) Use(middleware MiddlewareFunc) {
+	router.middleware = append(router.middleware, middleware)
 }
 
 func (router *Router) ListenAndServe() error {
