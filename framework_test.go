@@ -1,17 +1,17 @@
-package webframework_test
+package sword_test
 
 import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"sword"
 	"testing"
-	webframework "web-framework"
 
 	"github.com/stretchr/testify/assert"
 )
 
 func TestRouting(t *testing.T) {
-	r := webframework.NewRouter(nil)
+	r := sword.NewRouter(nil)
 
 	r.RouteFunc("GET /", func(w http.ResponseWriter, r *http.Request) error {
 		w.WriteHeader(http.StatusAccepted)
@@ -20,7 +20,7 @@ func TestRouting(t *testing.T) {
 	})
 
 	r.RouteFunc("GET /error", func(w http.ResponseWriter, r *http.Request) error {
-		return webframework.Error(http.StatusInternalServerError, "error")
+		return sword.Error(http.StatusInternalServerError, "error")
 	})
 
 	req, err := http.NewRequest("GET", "/", nil)

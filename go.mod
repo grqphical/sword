@@ -1,4 +1,4 @@
-module web-framework
+module sword
 
 go 1.22.5
 
