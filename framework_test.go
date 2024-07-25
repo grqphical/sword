@@ -6,7 +6,6 @@ import (
 	"net/http/httptest"
 	"testing"
 	webframework "web-framework"
-	responses "web-framework/responses"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -14,20 +13,34 @@ import (
 func TestRouting(t *testing.T) {
 	r := webframework.NewRouter(nil)
 
-	r.RouteFunc("GET /", func(r *http.Request) (webframework.Response, error) {
-		return responses.JSON(map[string]string{
-			"message": "Hello, World",
-		}, http.StatusOK), nil
+	r.RouteFunc("GET /", func(w http.ResponseWriter, r *http.Request) error {
+		w.WriteHeader(http.StatusAccepted)
+		w.Write([]byte("Hello, World!"))
+		return nil
+	})
+
+	r.RouteFunc("GET /error", func(w http.ResponseWriter, r *http.Request) error {
+		return webframework.Error(http.StatusInternalServerError, "error")
 	})
 
 	req, err := http.NewRequest("GET", "/", nil)
 	assert.NoError(t, err)
 
 	resp := httptest.NewRecorder()
-
 	r.ServeHTTP(resp, req)
 
-	var data map[string]string
-	assert.NoError(t, json.NewDecoder(resp.Body).Decode(&data))
-	assert.Equal(t, "Hello, World", data["message"])
+	body := resp.Body.String()
+	assert.Equal(t, "Hello, World!", body)
+	assert.Equal(t, 202, resp.Code)
+
+	resp = httptest.NewRecorder()
+
+	req, err = http.NewRequest("GET", "/error", nil)
+	assert.NoError(t, err)
+	r.ServeHTTP(resp, req)
+
+	var respData map[string]string
+	assert.NoError(t, json.NewDecoder(resp.Body).Decode(&respData))
+	assert.Equal(t, "error", respData["error"])
+	assert.Equal(t, 500, resp.Code)
 }

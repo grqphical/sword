@@ -6,10 +6,6 @@ import (
 	"net/http"
 )
 
-type Response interface {
-	WriteResponse(http.ResponseWriter) error
-}
-
 type HandlerError struct {
 	message string
 	code    int
@@ -19,7 +15,7 @@ func (h HandlerError) Error() string {
 	return h.message
 }
 
-type HandlerFunc = func(*http.Request) (Response, error)
+type HandlerFunc = func(http.ResponseWriter, *http.Request) error
 type ErrorHandlerFunc = func(http.ResponseWriter, error)
 
 type RouterConfig struct {
@@ -33,7 +29,7 @@ type Router struct {
 	errorHandler ErrorHandlerFunc
 }
 
-func DefaultErrorHandler(w http.ResponseWriter, err error) {
+func defaultErrorHandler(w http.ResponseWriter, err error) {
 	var handlerErr HandlerError
 	if errors.As(err, &handlerErr) {
 		w.WriteHeader(handlerErr.code)
@@ -42,6 +38,13 @@ func DefaultErrorHandler(w http.ResponseWriter, err error) {
 	json.NewEncoder(w).Encode(map[string]string{
 		"error": err.Error(),
 	})
+}
+
+func Error(code int, message string) error {
+	return HandlerError{
+		code:    code,
+		message: message,
+	}
 }
 
 func NewRouter(config *RouterConfig) *Router {
@@ -55,13 +58,13 @@ func NewRouter(config *RouterConfig) *Router {
 		}
 
 		if config.errorHandler == nil {
-			r.errorHandler = DefaultErrorHandler
+			r.errorHandler = defaultErrorHandler
 		} else {
 			r.errorHandler = config.errorHandler
 		}
 	} else {
 		r.address = ":5000"
-		r.errorHandler = DefaultErrorHandler
+		r.errorHandler = defaultErrorHandler
 	}
 
 	mux := http.NewServeMux()
@@ -72,13 +75,7 @@ func NewRouter(config *RouterConfig) *Router {
 
 func (router *Router) RouteFunc(pattern string, h HandlerFunc) {
 	router.mux.HandleFunc(pattern, func(w http.ResponseWriter, r *http.Request) {
-		resp, err := h(r)
-		if err != nil {
-			router.errorHandler(w, err)
-			return
-		}
-
-		err = resp.WriteResponse(w)
+		err := h(w, r)
 		if err != nil {
 			router.errorHandler(w, err)
 			return
