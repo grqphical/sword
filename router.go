@@ -2,11 +2,13 @@ package sword
 
 import "net/http"
 
+// configuration for the Sword router
 type RouterConfig struct {
 	address      string
 	errorHandler ErrorHandlerFunc
 }
 
+// Router is the main wrapper for sword and handles routing, middleware, errors etc.
 type Router struct {
 	address      string
 	mux          *http.ServeMux
@@ -17,6 +19,7 @@ func NewRouter(config *RouterConfig) *Router {
 	r := &Router{}
 
 	if config != nil {
+		// a configuration was passed in
 		if config.address == "" {
 			r.address = ":5000"
 		} else {
@@ -29,6 +32,7 @@ func NewRouter(config *RouterConfig) *Router {
 			r.errorHandler = config.errorHandler
 		}
 	} else {
+		// no config was provided
 		r.address = ":5000"
 		r.errorHandler = defaultErrorHandler
 	}
@@ -39,6 +43,10 @@ func NewRouter(config *RouterConfig) *Router {
 	return r
 }
 
+// Routes a handler function to a specific route. Sword supports the Golang net/http routing style including specifying methods and wildcards
+//
+// Example:
+// router.RouteFunc("GET /", someHandler)
 func (router *Router) RouteFunc(pattern string, h HandlerFunc) {
 	router.mux.HandleFunc(pattern, func(w http.ResponseWriter, r *http.Request) {
 		err := h(w, r)
