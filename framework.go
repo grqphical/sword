@@ -20,3 +20,23 @@ func Error(code int, message string) error {
 		message: message,
 	}
 }
+
+// Wraps a Go http.Handler to a sword.HandlerFunc.
+//
+// Error handling for Go handlers is disabled as it is expected that Go handler's will handler errors themselves.
+func WrapHandler(h http.Handler) HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) error {
+		h.ServeHTTP(w, r)
+		return nil
+	}
+}
+
+// Wraps a Go http.Handler to a sword.HandlerFunc.
+//
+// Error handling for Go handlers is disabled as it is expected that Go handler's will handler errors themselves.
+func WrapHandlerFunc(h http.HandlerFunc) HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) error {
+		h(w, r)
+		return nil
+	}
+}
