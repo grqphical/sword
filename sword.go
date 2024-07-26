@@ -10,17 +10,6 @@ import (
 // function signature for HTTP handlers
 type HandlerFunc = func(http.ResponseWriter, *http.Request) error
 
-// function signature for error handling functions
-type ErrorHandlerFunc = func(http.ResponseWriter, error)
-
-// Creates a HandlerError based on a given code and message. This function is supposed to replace http.Error()
-func Error(code int, message string) error {
-	return HandlerError{
-		code:    code,
-		message: message,
-	}
-}
-
 // Wraps a Go http.Handler to a sword.HandlerFunc.
 //
 // Error handling for Go handlers is disabled as it is expected that Go handler's will handler errors themselves.
