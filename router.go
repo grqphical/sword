@@ -74,10 +74,12 @@ func (router *Router) Use(middleware MiddlewareFunc) {
 	router.middleware = append(router.middleware, middleware)
 }
 
+// Starts the router on the defined address
 func (router *Router) ListenAndServe() error {
 	return http.ListenAndServe(router.address, router.mux)
 }
 
+// ensures Router satisifies the http.Handler interface
 func (router *Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	router.mux.ServeHTTP(w, r)
 }
