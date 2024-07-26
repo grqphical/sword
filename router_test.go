@@ -4,8 +4,9 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
-	"sword"
 	"testing"
+
+	"github.com/grqphical/sword"
 
 	"github.com/stretchr/testify/assert"
 )
