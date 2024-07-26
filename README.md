@@ -1,7 +1,7 @@
 # sword - A lightweight web framework built around the Golang Standard Library HTTP server
 [![Go Tests](https://github.com/grqphical/sword/actions/workflows/go.yml/badge.svg)](https://github.com/grqphical/sword/actions/workflows/go.yml)
 
-I made this as a personal tool to improve the design of my API's. The only difference this library makes is that it allows for better management of middleware and explicitly returning errors from handlers
+I made this as a personal tool to improve the design of my APIs. The only difference this library makes is that it allows for better management of middleware and explicitly returning errors from handlers
 
 ## Installation
 
