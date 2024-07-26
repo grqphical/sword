@@ -1,4 +1,4 @@
-module sword
+module github.com/grqphical/sword
 
 go 1.22.5
 

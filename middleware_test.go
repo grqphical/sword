@@ -3,8 +3,9 @@ package sword_test
 import (
 	"net/http"
 	"net/http/httptest"
-	"sword"
 	"testing"
+
+	"github.com/grqphical/sword"
 
 	"github.com/stretchr/testify/assert"
 )
